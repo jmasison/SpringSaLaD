@@ -1,0 +1,61 @@
+# This workflow will build and release the SS application
+
+name: Java CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'version tag'
+        required: true
+        default: 2.3.1
+
+env:
+  BUILD_VERSION: ${{ github.event.inputs.tag_name }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: setup java 17 with maven cache
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'maven'
+
+    - name: Maven dependencies
+      run: |
+        mvn --batch-mode clean install dependency:copy-dependencies
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.tag_name }}
+        release_name: Release ${{ github.event.inputs.tag_name }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./SpringSalad_${{ github.event.inputs.tag_name }}.jar
+        asset_name: SpringSaladApp_${{ github.event.inputs.tag_name }}.jar
+        asset_content_type: application/java-archive
+      
+    
+  
+    
+
+      

@@ -1,1 +1,13 @@
 /bin/
+/target/
+
+.idea/
+
+example_files/example_SIMULATIONS/
+
+.DS_Store
+/installers/
+/localsolvers/
+/install4j_output/
+/VCELL_APPLE_2025.p12
+/VCELL_APPLE_2015_pswd.txt
